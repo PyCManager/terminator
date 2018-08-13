@@ -1,3 +1,22 @@
+# Terminator
+*but it's a fork.*
+
+## What is this?
+This is the regular Terminator, but with a few additions.
+
+## Additions
+* Middle click to close a tab
+* One Dark/Light themes
+
+## Installing
+Look at [INSTALL](INSTALL)
+or just type
+```
+./setup.py build && sudo ./setup.py install
+```
+
+## Original README text.
+```
 Terminator
 by Chris Jones <cmsj@tenshu.net> and others.
 
@@ -45,3 +64,4 @@ I am thus licensing Terminator as GPL v2 only.
 Cristian Grada provided the old icon under the same licence.
 Cory Kontros provided the new icon under the CC-by-SA licence.
 For other authorship information, see debian/copyright
+```
