@@ -96,6 +96,12 @@
         <col id="0" translatable="yes">Gruvbox dark</col>
       </row>
       <row>
+        <col id="0" translatable="yes">One Dark</col>
+      </row>      
+      <row>
+        <col id="0" translatable="yes">One Light</col>
+      </row>
+      <row>
         <col id="0" translatable="yes">Custom</col>
       </row>
     </data>
@@ -219,6 +225,12 @@
       </row>
       <row>
         <col id="0" translatable="yes">Gruvbox dark</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">One Dark</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">One Light</col>
       </row>
       <row>
         <col id="0" translatable="yes">Custom</col>

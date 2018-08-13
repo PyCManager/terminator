@@ -50,7 +50,9 @@ class PrefsEditor:
                          'solarized_dark': 8,
                          'gruvbox_light': 9,
                          'gruvbox_dark': 10,
-                         'custom': 11}
+                         'one_dark': 11,
+                         'one_light': 12,
+                         'custom': 13}
     colourschemes = {'grey_on_black': ['#aaaaaa', '#000000'],
                      'black_on_yellow': ['#000000', '#ffffdd'],
                      'black_on_white': ['#000000', '#ffffff'],
@@ -61,7 +63,9 @@ class PrefsEditor:
                      'solarized_light': ['#657b83', '#fdf6e3'],
                      'solarized_dark': ['#839496', '#002b36'],
                      'gruvbox_light': ['#3c3836', '#fbf1c7'],
-                     'gruvbox_dark': ['#ebdbb2', '#282828']}
+                     'gruvbox_dark': ['#ebdbb2', '#282828'],
+                     'one_dark': ["#abb2bf", "#282c34"],
+                     'one_light': ["#383A42", "#F9F9F9"]}
     palettevalues = {'tango': 0,
                      'linux': 1,
                      'xterm': 2,
@@ -70,7 +74,9 @@ class PrefsEditor:
                      'solarized': 5,
                      'gruvbox_light': 6,
                      'gruvbox_dark': 7,
-                     'custom': 8}
+                     'one_dark': 8,
+                     'one_light': 9,
+                     'custom': 10}
     palettes = {'tango': '#000000:#cc0000:#4e9a06:#c4a000:#3465a4:\
 #75507b:#06989a:#d3d7cf:#555753:#ef2929:#8ae234:#fce94f:#729fcf:\
 #ad7fa8:#34e2e2:#eeeeec',
@@ -94,7 +100,13 @@ class PrefsEditor:
 #076678:#8f3f71:#427b58:#3c3836',
                 'gruvbox_dark': '#282828:#cc241d:#98971a:#d79921:\
 #458588:#b16286:#689d6a:#a89984:#928374:#fb4934:#b8bb26:#fabd2f:\
-#83a598:#d3869b:#8ec07c:#ebdbb2'}
+#83a598:#d3869b:#8ec07c:#ebdbb2',
+                'one_dark': '#000000:#e06c75:#98c379:#d19a66:#61aeee:\
+#c678dd:#56b6c2:#abb2bf:#5c6370:#e06c75:#98c379:#d19a66:#62afee:\
+#c678dd:#56b6c2:#ffffff',
+                'one_light': '#000000:#e45649:#50a14f:#986801:#4078f2:\
+#a626a4:#0184bc:#a0a1a7:#5c6370:#e45649:#50a14f:#986801:#4078f2:\
+#a626a4:#0184bc:#ffffff'}
     keybindingnames = { 'zoom_in'          : _('Increase font size'),
                         'zoom_out'         : _('Decrease font size'),
                         'zoom_normal'      : _('Restore original font size'),
