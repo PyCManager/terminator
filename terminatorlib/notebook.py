@@ -650,6 +650,8 @@ class TabLabel(Gtk.HBox):
         self.emit('close-clicked', self)
 
     def on_title_click(self, widget, event):
+        """The tab label was clicked. This is probably not
+           the best way to do it, but it works."""
         if event.button == 2:
             self.emit('close-clicked', self)
 
