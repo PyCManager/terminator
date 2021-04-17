@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # Terminator by Chris Jones <cmsj@tenshu.net>
 # GPL v2 only
 """factory.py - Maker of objects
@@ -22,10 +21,13 @@ True
 from terminatorlib.borg import Borg
 from terminatorlib.util import dbg, err, inject_uuid
 
-# pylint: disable-msg=R0201
-# pylint: disable-msg=W0613
+
 class Factory(Borg):
-    """Definition of a class that makes other classes"""
+    # pylint: disable-msg=R0201
+    # pylint: disable-msg=W0613
+    """
+    Definition of a class that makes other classes
+    """
     types = {'Terminal': 'terminal',
              'VPaned': 'paned',
              'HPaned': 'paned',
