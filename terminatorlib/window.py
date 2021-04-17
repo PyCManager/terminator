@@ -5,18 +5,40 @@
 
 import copy
 import time
+import platform
 import uuid
 import gi
-from gi.repository import GObject
-from gi.repository import Gtk, Gdk, GdkX11
 
-from util import dbg, err, make_uuid, display_manager
-import util
-from translation import _
-from version import APP_NAME
-from container import Container
-from factory import Factory
-from terminator import Terminator
+# Platforms
+WINDOWS = (platform.system() == "Windows")
+LINUX = (platform.system() == "Linux")
+MAC = (platform.system() == "Darwin")
+
+from gi.repository import GObject
+from gi.repository import Gtk, Gdk
+
+# Linux imports
+if LINUX:
+    # noinspection PyUnresolvedReferences
+    from gi.repository import GdkX11
+
+from terminatorlib.util import (
+    dbg,
+    err,
+    get_edge,
+    make_uuid,
+    get_nav_offset,
+    display_manager,
+    get_nav_possible,
+    get_nav_tiebreak,
+    enumerate_descendants
+)
+from terminatorlib.translation import _
+from terminatorlib.version import APP_NAME
+from terminatorlib.container import Container
+from terminatorlib.factory import Factory
+from terminatorlib.terminator import Terminator
+
 
 if display_manager() == 'X11':
     try:
@@ -75,7 +97,7 @@ class Window(Container, Gtk.Window):
 
         self.title = WindowTitle(self)
         self.title.update()
-        
+
         self.preventHide = False
 
         options = self.config.options_get()
@@ -85,13 +107,13 @@ class Window(Container, Gtk.Window):
 
             if options.role:
                 self.set_role(options.role)
-            
+
             if options.forcedicon is not None:
                 icon_to_apply = options.forcedicon
 
             if options.geometry:
                 if not self.parse_geometry(options.geometry):
-                    err('Window::__init__: Unable to parse geometry: %s' % 
+                    err('Window::__init__: Unable to parse geometry: %s' %
                             options.geometry)
 
         self.apply_icon(icon_to_apply)
@@ -287,7 +309,7 @@ class Window(Container, Gtk.Window):
     def confirm_close(self, window, type):
         """Display a confirmation dialog when the user is closing multiple
         terminals in one window"""
-        
+
         return(not (self.construct_confirm_close(window, type) == Gtk.ResponseType.ACCEPT))
 
     def on_destroy_event(self, widget, data=None):
@@ -325,7 +347,7 @@ class Window(Container, Gtk.Window):
     # pylint: disable-msg=W0613
     def on_window_state_changed(self, window, event):
         """Handle the state of the window changing"""
-        self.isfullscreen = bool(event.new_window_state & 
+        self.isfullscreen = bool(event.new_window_state &
                                  Gdk.WindowState.FULLSCREEN)
         self.ismaximised = bool(event.new_window_state &
                                  Gdk.WindowState.MAXIMIZED)
@@ -384,7 +406,7 @@ class Window(Container, Gtk.Window):
             visual = screen.get_rgba_visual()
             if visual:
                 self.set_visual(visual)
-    
+
     def show(self, startup=False):
         """Undo the startup show request if started in hidden mode"""
         #Present is necessary to grab focus when window is hidden from taskbar.
@@ -466,7 +488,7 @@ class Window(Container, Gtk.Window):
             container = maker.make('VPaned')
         else:
             container = maker.make('HPaned')
-        
+
         self.set_pos_by_ratio = True
 
         if not sibling:
@@ -490,12 +512,11 @@ class Window(Container, Gtk.Window):
         for term in order:
             container.add(term)
         container.show_all()
-        
+
         while Gtk.events_pending():
             Gtk.main_iteration_do(False)
         sibling.grab_focus()
         self.set_pos_by_ratio = False
-
 
     def zoom(self, widget, font_scale=True):
         """Zoom a terminal widget"""
@@ -517,7 +538,7 @@ class Window(Container, Gtk.Window):
         self.set_property('term_zoomed', True)
 
         if font_scale:
-            widget.cnxids.new(widget, 'size-allocate', 
+            widget.cnxids.new(widget, 'size-allocate',
                     widget.zoom_scale, self.zoom_data)
 
         widget.grab_focus()
@@ -655,7 +676,7 @@ class Window(Container, Gtk.Window):
         extra_height = win_height - total_font_height
 
         dbg('setting geometry hints: (ewidth:%s)(eheight:%s),\
-(fwidth:%s)(fheight:%s)' % (extra_width, extra_height, 
+(fwidth:%s)(fheight:%s)' % (extra_width, extra_height,
                             font_width, font_height))
         geometry = Gdk.Geometry()
         geometry.base_width = extra_width
@@ -754,7 +775,7 @@ class Window(Container, Gtk.Window):
         if not maker.isinstance(notebook, 'Notebook'):
             dbg('note in a notebook, refusing to ungroup tab')
             return
-        
+
         self.set_groups(None, self.get_visible_terminals())
 
     def move_tab(self, widget, direction):
@@ -784,12 +805,12 @@ class Window(Container, Gtk.Window):
         else:
             err('unknown direction: %s' % direction)
             return
-        
+
         notebook.reorder_child(child, page)
 
     def navigate_terminal(self, terminal, direction):
         """Navigate around terminals"""
-        _containers, terminals = util.enumerate_descendants(self)
+        _containers, terminals = enumerate_descendants(self)
         visibles = self.get_visible_terminals()
         current = terminals.index(terminal)
         length = len(terminals)
@@ -818,13 +839,13 @@ class Window(Container, Gtk.Window):
             possibles = []
 
             # Get the co-ordinate of the appropriate edge for this direction
-            edge, p1, p2 = util.get_edge(allocation, direction)
+            edge, p1, p2 = get_edge(allocation, direction)
             # Find all visible terminals which are, in their entirity, in the
             # direction we want to move, and are at least partially spanning
             # p1 to p2
             for term in layout:
                 rect = layout[term]
-                if util.get_nav_possible(edge, rect, direction, p1, p2):
+                if get_nav_possible(edge, rect, direction, p1, p2):
                     possibles.append(term)
 
             if len(possibles) == 0:
@@ -836,7 +857,7 @@ class Window(Container, Gtk.Window):
             offsets = {}
             for term in possibles:
                 rect = layout[term]
-                offsets[term] = util.get_nav_offset(edge, rect, direction)
+                offsets[term] = get_nav_offset(edge, rect, direction)
             keys = offsets.values()
             keys.sort()
             winners = [k for k, v in offsets.iteritems() if v == keys[0]]
@@ -850,10 +871,9 @@ class Window(Container, Gtk.Window):
 
                 for term in winners:
                     rect = layout[term]
-                    if util.get_nav_tiebreak(direction, cursor_x, cursor_y,
-                            rect):
+                    if get_nav_tiebreak(direction, cursor_x, cursor_y, rect):
                         next = terminals.index(term)
-                        break;
+                        break
         else:
             err('Unknown navigation direction: %s' % direction)
 
@@ -862,7 +882,7 @@ class Window(Container, Gtk.Window):
 
     def create_layout(self, layout):
         """Apply any config items from our layout"""
-        if not layout.has_key('children'):
+        if 'children' not in layout:
             err('layout describes no children: %s' % layout)
             return
         children = layout['children']
@@ -871,7 +891,7 @@ class Window(Container, Gtk.Window):
             err('incorrect number of children for Window: %s' % layout)
             return
 
-        child = children[children.keys()[0]]
+        child = children[children[0]]
         terminal = self.get_children()[0]
         dbg('Making a child of type: %s' % child['type'])
         if child['type'] == 'VPaned':
@@ -892,11 +912,12 @@ class Window(Container, Gtk.Window):
 
         self.get_children()[0].create_layout(child)
 
-        if layout.has_key('last_active_term') and layout['last_active_term'] not in ['', None]:
+        if 'last_active_term' in layout and layout['last_active_term'] not in ['', None]:
             self.last_active_term = make_uuid(layout['last_active_term'])
 
-        if layout.has_key('last_active_window') and layout['last_active_window'] == 'True':
+        if 'last_active_window' in layout and layout['last_active_window'] == 'True':
             self.terminator.last_active_window = self.uuid
+
 
 class WindowTitle(object):
     """Class to handle the setting of the window title"""

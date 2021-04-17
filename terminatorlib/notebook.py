@@ -8,13 +8,14 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Gio
 
-from terminator import Terminator
-from config import Config
-from factory import Factory
-from container import Container
-from editablelabel import EditableLabel
-from translation import _
-from util import err, dbg, enumerate_descendants, make_uuid
+from terminatorlib.terminator import Terminator
+from terminatorlib.config import Config
+from terminatorlib.factory import Factory
+from terminatorlib.container import Container
+from terminatorlib.editablelabel import EditableLabel
+from terminatorlib.translation import _
+from terminatorlib.util import err, dbg, enumerate_descendants, make_uuid
+
 
 class Notebook(Container, Gtk.Notebook):
     """Class implementing a Gtk.Notebook container"""
@@ -65,7 +66,7 @@ class Notebook(Container, Gtk.Notebook):
             pos = getattr(Gtk.PositionType, self.config['tab_position'].upper())
             self.set_tab_pos(pos)
 
-        for tab in xrange(0, self.get_n_pages()):
+        for tab in range(0, self.get_n_pages()):
             label = self.get_tab_label(self.get_nth_page(tab))
             label.update_angle()
 
@@ -202,12 +203,11 @@ class Notebook(Container, Gtk.Notebook):
         """Remove a widget from the container"""
         page_num = self.page_num(widget)
         if page_num == -1:
-            err('%s not found in Notebook. Actual parent is: %s' % 
-                    (widget, widget.get_parent()))
-            return(False)
+            err('%s not found in Notebook. Actual parent is: %s' % (widget, widget.get_parent()))
+            return False
         self.remove_page(page_num)
         self.disconnect_child(widget)
-        return(True)
+        return True
 
     def replace(self, oldwidget, newwidget):
         """Replace a tab's contents with a new widget"""
@@ -233,7 +233,7 @@ class Notebook(Container, Gtk.Notebook):
     def get_children(self):
         """Return an ordered list of our children"""
         children = []
-        for page in xrange(0,self.get_n_pages()):
+        for page in range(0,self.get_n_pages()):
             children.append(self.get_nth_page(page))
         return(children)
 
@@ -334,7 +334,7 @@ class Notebook(Container, Gtk.Notebook):
             err('TabLabel::closetab: called on non-Notebook: %s' % widget)
             return
 
-        for i in xrange(0, nb.get_n_pages() + 1):
+        for i in range(0, nb.get_n_pages() + 1):
             if label == nb.get_tab_label(nb.get_nth_page(i)):
                 tabnum = i
                 break
@@ -410,7 +410,7 @@ class Notebook(Container, Gtk.Notebook):
         if not label:
             err('Notebook::update_tab_label_text: %s not found' % widget)
             return
-        
+
         label.set_label(text)
 
     def hoover(self):
@@ -464,7 +464,7 @@ class Notebook(Container, Gtk.Notebook):
         if self.terminator.doing_layout == True:
             return
         last_active_term = {}
-        for tabnum in xrange(0, self.get_n_pages()):
+        for tabnum in range(0, self.get_n_pages()):
             nth_page = self.get_nth_page(tabnum)
             if nth_page in self.last_active_term:
                 last_active_term[nth_page] = self.last_active_term[nth_page]
@@ -473,8 +473,8 @@ class Notebook(Container, Gtk.Notebook):
     def deferred_on_tab_switch(self, notebook, page,  page_num,  data=None):
         """Prime a single idle tab switch signal, using the most recent set of params"""
         tabs_last_active_term = self.last_active_term.get(self.get_nth_page(page_num),  None)
-        data = {'tabs_last_active_term':tabs_last_active_term}
-        
+        data = {'tabs_last_active_term': tabs_last_active_term}
+
         self.pending_on_tab_switch_args = (notebook, page,  page_num,  data)
         if self.pending_on_tab_switch == True:
             return
@@ -501,15 +501,15 @@ class Notebook(Container, Gtk.Notebook):
         #print "event: %s" % event
         child = self.get_nth_page(self.get_current_page())
         if child == None:
-            print "Child = None,  return false"
+            print("Child = None,  return false")
             return False
 
         event_widget = Gtk.get_event_widget(event)
-        
+
         if event_widget == None or \
            event_widget == child or \
            event_widget.is_ancestor(child):
-            print "event_widget is wrong one,  return false"
+            print("event_widget is wrong one,  return false")
             return False
 
         # Not sure if we need these. I don't think wehave any action widgets
@@ -543,6 +543,7 @@ class Notebook(Container, Gtk.Notebook):
                 elif event.delta_x < 0:
                     self.prev_page()
         return True
+
 
 class TabLabel(Gtk.HBox):
     """Class implementing a label widget for Notebook tabs"""
@@ -590,9 +591,9 @@ class TabLabel(Gtk.HBox):
     def get_custom_label(self):
         """Return a custom label if we have one, otherwise None"""
         if self.label.is_custom():
-            return(self.label.get_text())
+            return self.label.get_text()
         else:
-            return(None)
+            return None
 
     def edit(self):
         self.label.edit()
@@ -603,8 +604,8 @@ class TabLabel(Gtk.HBox):
             if self.button:
                 self.button.remove(self.icon)
                 self.remove(self.button)
-                del(self.button)
-                del(self.icon)
+                del self.button
+                del self.icon
                 self.button = None
                 self.icon = None
             return
@@ -614,7 +615,7 @@ class TabLabel(Gtk.HBox):
         if not self.icon:
             self.icon = Gio.ThemedIcon.new_with_default_fallbacks("window-close-symbolic")
             self.icon = Gtk.Image.new_from_gicon(self.icon, Gtk.IconSize.MENU)
-            
+
         self.button.set_focus_on_click(False)
         self.button.set_relief(Gtk.ReliefStyle.NONE)
 #        style = Gtk.RcStyle()  # FIXME FOR GTK3 how to do it there? actually do we really want to override the theme?

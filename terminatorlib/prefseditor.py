@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-"""Preferences Editor for Terminator. 
+"""Preferences Editor for Terminator.
 
 Load a UIBuilder config file, display it,
 populate it with our current config, then optionally read that back out and
@@ -8,16 +8,18 @@ write it to a config file
 """
 
 import os
+import terminatorlib.config
 from gi.repository import GObject, Gtk, Gdk
 
-from util import dbg, err
-import config
-from keybindings import Keybindings, KeymapError
-from translation import _
-from encoding import TerminatorEncoding
-from terminator import Terminator
-from plugin import PluginRegistry
-from version import APP_NAME
+from terminatorlib.util import dbg, err
+from terminatorlib.config import Config
+from terminatorlib.keybindings import Keybindings, KeymapError
+from terminatorlib.translation import _
+from terminatorlib.encoding import TerminatorEncoding
+from terminatorlib.terminator import Terminator
+from terminatorlib.plugin import PluginRegistry
+from terminatorlib.version import APP_NAME
+
 
 def color2hex(widget):
     """Pull the colour values out of a Gtk ColorPicker widget and return them
@@ -25,8 +27,10 @@ def color2hex(widget):
     widcol = widget.get_color()
     return('#%02x%02x%02x' % (widcol.red>>8, widcol.green>>8, widcol.blue>>8))
 
-# FIXME: We need to check that we have represented all of Config() below
+
+
 class PrefsEditor:
+    # FIXME: We need to check that we have represented all of Config() below
     """Class implementing the various parts of the preferences editor"""
     config = None
     registry = None
@@ -177,12 +181,12 @@ class PrefsEditor:
                         'edit_tab_title'   : _('Edit tab title'),
                         'layout_launcher'  : _('Open layout launcher window'),
                         'next_profile'     : _('Switch to next profile'),
-                        'previous_profile' : _('Switch to previous profile'), 
+                        'previous_profile' : _('Switch to previous profile'),
                         'help'             : _('Open the manual')
-            }
+    }
 
-    def __init__ (self, term):
-        self.config = config.Config()
+    def __init__(self, term):
+        self.config = Config()
         self.config.base.reload()
         self.term = term
         self.calling_window = self.term.get_toplevel()
@@ -192,13 +196,13 @@ class PrefsEditor:
         self.keybindings = Keybindings()
         try:
             # Figure out where our library is on-disk so we can open our
-            (head, _tail) = os.path.split(config.__file__)
+            (head, _tail) = os.path.split(terminatorlib.config.__file__)
             librarypath = os.path.join(head, 'preferences.glade')
             gladefile = open(librarypath, 'r')
             gladedata = gladefile.read()
-        except Exception, ex:
-            print "Failed to find preferences.glade"
-            print ex
+        except Exception as ex:
+            print("Failed to find preferences.glade")
+            print(ex)
             return
 
         self.builder.add_from_string(gladedata)
@@ -219,7 +223,7 @@ class PrefsEditor:
         try:
             self.config.inhibit_save()
             self.set_values()
-        except Exception, e:
+        except Exception as e:
             err('Unable to set values: %s' % e)
         self.config.uninhibit_save()
 
@@ -576,7 +580,7 @@ class PrefsEditor:
         # NOTE: The palette selector is set after the colour pickers
         # Palette colour pickers
         colourpalette = self.config['palette'].split(':')
-        for i in xrange(1, 17):
+        for i in range(1, 17):
             widget = guiget('palette_colorpicker_%d' % i)
             widget.set_color(Gdk.color_parse(colourpalette[i - 1]))
         # Now set the palette selector widget
@@ -911,20 +915,20 @@ class PrefsEditor:
         else:
             sensitive = False
 
-        for num in xrange(1, 17):
+        for num in range(1, 17):
             picker = guiget('palette_colorpicker_%d' % num)
             picker.set_sensitive(sensitive)
 
         if value in self.palettes:
             palette = self.palettes[value]
             palettebits = palette.split(':')
-            for num in xrange(1, 17):
+            for num in range(1, 17):
                 # Update the visible elements
                 picker = guiget('palette_colorpicker_%d' % num)
                 picker.set_color(Gdk.color_parse(palettebits[num - 1]))
         elif value == 'custom':
             palettebits = []
-            for num in xrange(1, 17):
+            for num in range(1, 17):
                 picker = guiget('palette_colorpicker_%d' % num)
                 palettebits.append(color2hex(picker))
             palette = ':'.join(palettebits)
@@ -952,7 +956,7 @@ class PrefsEditor:
         guiget = self.builder.get_object
 
         # FIXME: We do this at least once elsewhere. refactor!
-        for num in xrange(1, 17):
+        for num in range(1, 17):
             picker = guiget('palette_colorpicker_%d' % num)
             value = color2hex(picker)
             palettebits.append(value)
@@ -988,10 +992,10 @@ class PrefsEditor:
 
         customwidget = guiget('cursor_color_custom_radiobutton')
         colorwidget = guiget('cursor_color')
-        
+
         colorwidget.set_sensitive(customwidget.get_active())
         self.config['cursor_color_fg'] = not customwidget.get_active()
-        
+
         try:
             colorwidget.set_color(Gdk.color_parse(self.config['cursor_color']))
         except (ValueError, TypeError):
@@ -1276,7 +1280,7 @@ class PrefsEditor:
         widget.set_sensitive(not value)
         self.config['use_system_font'] = value
         self.config.save()
-        
+
         if self.config['use_system_font'] == True:
             fontname = self.config.get_system_mono_font()
             if fontname is not None:
@@ -1547,7 +1551,7 @@ class LayoutEditor:
 
     def __init__(self, builder):
         """Initialise ourself"""
-        self.config = config.Config()
+        self.config = Config()
         self.builder = builder
 
     def prepare(self, layout=None):
@@ -1701,8 +1705,8 @@ class LayoutEditor:
         self.config.save()
 
 if __name__ == '__main__':
-    import util
-    util.DEBUG = True
+    import terminatorlib.util
+    terminatorlib.util.DEBUG = True
     import terminal
     TERM = terminal.Terminal()
     PREFEDIT = PrefsEditor(TERM)

@@ -25,10 +25,11 @@
 
 import sys
 import os
-import borg
-from config import Config
-from util import dbg, err, get_config_dir
-from terminator import Terminator
+from terminatorlib.borg import Borg
+from terminatorlib.config import Config
+from terminatorlib.util import dbg, err, get_config_dir
+from terminatorlib.terminator import Terminator
+
 
 class Plugin(object):
     """Definition of our base plugin class"""
@@ -42,7 +43,7 @@ class Plugin(object):
         """Prepare to be unloaded"""
         pass
 
-class PluginRegistry(borg.Borg):
+class PluginRegistry(Borg):
     """Definition of a class to store plugin instances"""
     available_plugins = None
     instances = None
@@ -51,7 +52,7 @@ class PluginRegistry(borg.Borg):
 
     def __init__(self):
         """Class initialiser"""
-        borg.Borg.__init__(self, self.__class__.__name__)
+        Borg.__init__(self, self.__class__.__name__)
         self.prepare_attributes()
 
     def prepare_attributes(self):
@@ -60,10 +61,10 @@ class PluginRegistry(borg.Borg):
             self.instances = {}
         if not self.path:
             self.path = []
-            (head, _tail) = os.path.split(borg.__file__)
+            (head, _tail) = os.path.split(Borg.__file__)
             self.path.append(os.path.join(head, 'plugins'))
             self.path.append(os.path.join(get_config_dir(), 'plugins'))
-            dbg('PluginRegistry::prepare_attributes: Plugin path: %s' % 
+            dbg('PluginRegistry::prepare_attributes: Plugin path: %s' %
                 self.path)
         if not self.done:
             self.done = False
@@ -90,7 +91,7 @@ class PluginRegistry(borg.Borg):
                     continue
                 pluginpath = os.path.join(plugindir, plugin)
                 if os.path.isfile(pluginpath) and plugin[-3:] == '.py':
-                    dbg('PluginRegistry::load_plugins: Importing plugin %s' % 
+                    dbg('PluginRegistry::load_plugins: Importing plugin %s' %
                         plugin)
                     try:
                         module = __import__(plugin[:-3], None, None, [''])
@@ -104,7 +105,7 @@ class PluginRegistry(borg.Borg):
                                 continue
                             if item not in self.instances:
                                 self.instances[item] = func()
-                    except Exception, ex:
+                    except Exception as ex:
                         err('PluginRegistry::load_plugins: Importing plugin %s \
 failed: %s' % (plugin, ex))
 
@@ -122,17 +123,17 @@ for %s' % (len(self.instances), capability))
 
     def get_all_plugins(self):
         """Return all plugins"""
-        return(self.instances)
+        return self.instances
 
     def get_available_plugins(self):
         """Return a list of all available plugins whether they are enabled or
         disabled"""
-        return(self.available_plugins.keys())
+        return self.available_plugins.keys()
 
     def is_enabled(self, plugin):
         """Return a boolean value indicating whether a plugin is enabled or
         not"""
-        return(self.instances.has_key(plugin))
+        return self.instances.has_key(plugin)
 
     def enable(self, plugin):
         """Enable a plugin"""

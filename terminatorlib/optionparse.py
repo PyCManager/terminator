@@ -18,15 +18,22 @@
 
 import sys
 import os
+import terminatorlib
 
 from optparse import OptionParser, SUPPRESS_HELP
-from util import dbg, err
-import util
-import config
-import version
-from translation import _
+from terminatorlib.util import (
+    dbg,
+    err,
+)
+from terminatorlib.config import Config
+from terminatorlib.version import (
+    APP_NAME,
+    APP_VERSION
+)
+from terminatorlib.translation import _
 
 options = None
+
 
 def execute_cb(option, opt, value, lparser):
     """Callback for use in parsing execute options"""
@@ -37,6 +44,7 @@ def execute_cb(option, opt, value, lparser):
         value.append(arg)
         del(lparser.rargs[0])
     setattr(lparser.values, option.dest, value)
+
 
 def parse_options():
     """Parse the command line options"""
@@ -56,44 +64,44 @@ def parse_options():
             dest='borderless', help=_('Disable window borders'))
     parser.add_option('-H', '--hidden', action='store_true', dest='hidden',
             help=_('Hide the window at startup'))
-    parser.add_option('-T', '--title', dest='forcedtitle', 
+    parser.add_option('-T', '--title', dest='forcedtitle',
                       help=_('Specify a title for the window'))
-    parser.add_option('--geometry', dest='geometry', type='string', 
+    parser.add_option('--geometry', dest='geometry', type='string',
                       help=_('Set the preferred size and position of the window'
                              '(see X man page)'))
     if not is_x_terminal_emulator:
-        parser.add_option('-e', '--command', dest='command', 
+        parser.add_option('-e', '--command', dest='command',
                 help=_('Specify a command to execute inside the terminal'))
     else:
-        parser.add_option('--command', dest='command', 
+        parser.add_option('--command', dest='command',
                 help=_('Specify a command to execute inside the terminal'))
         parser.add_option('-e', '--execute2', dest='execute', action='callback',
-                callback=execute_cb, 
+                callback=execute_cb,
                 help=_('Use the rest of the command line as a command to '
                        'execute inside the terminal, and its arguments'))
-    parser.add_option('-g', '--config', dest='config', 
+    parser.add_option('-g', '--config', dest='config',
                       help=_('Specify a config file'))
     parser.add_option('-x', '--execute', dest='execute', action='callback',
-            callback=execute_cb, 
+            callback=execute_cb,
             help=_('Use the rest of the command line as a command to execute '
                    'inside the terminal, and its arguments'))
     parser.add_option('--working-directory', metavar='DIR',
             dest='working_directory', help=_('Set the working directory'))
     parser.add_option('-i', '--icon', dest='forcedicon', help=_('Set a custom \
 icon for the window (by file or name)'))
-    parser.add_option('-r', '--role', dest='role', 
+    parser.add_option('-r', '--role', dest='role',
             help=_('Set a custom WM_WINDOW_ROLE property on the window'))
-    parser.add_option('-l', '--layout', dest='layout', 
+    parser.add_option('-l', '--layout', dest='layout',
             help=_('Launch with the given layout'))
     parser.add_option('-s', '--select-layout', action='store_true',
             dest='select', help=_('Select a layout from a list'))
-    parser.add_option('-p', '--profile', dest='profile', 
+    parser.add_option('-p', '--profile', dest='profile',
             help=_('Use a different profile as the default'))
-    parser.add_option('-u', '--no-dbus', action='store_true', dest='nodbus', 
+    parser.add_option('-u', '--no-dbus', action='store_true', dest='nodbus',
             help=_('Disable DBus'))
     parser.add_option('-d', '--debug', action='count', dest='debug',
             help=_('Enable debugging information (twice for debug server)'))
-    parser.add_option('--debug-classes', action='store', dest='debug_classes', 
+    parser.add_option('--debug-classes', action='store', dest='debug_classes',
             help=_('Comma separated list of classes to limit debugging to'))
     parser.add_option('--debug-methods', action='store', dest='debug_methods',
             help=_('Comma separated list of methods to limit debugging to'))
@@ -110,7 +118,7 @@ icon for the window (by file or name)'))
         parser.error('Additional unexpected arguments found: %s' % args)
 
     if options.version:
-        print '%s %s' % (version.APP_NAME, version.APP_VERSION)
+        print('%s %s' % (APP_NAME, APP_VERSION))
         sys.exit(0)
 
     if options.debug_classes or options.debug_methods:
@@ -118,17 +126,17 @@ icon for the window (by file or name)'))
             options.debug = 1
 
     if options.debug:
-        util.DEBUG = True
+        terminatorlib.util.DEBUG = True
         if options.debug > 1:
-            util.DEBUGFILES = True
+            terminatorlib.util.DEBUGFILES = True
         if options.debug_classes:
             classes = options.debug_classes.split(',')
             for item in classes:
-                util.DEBUGCLASSES.append(item.strip())
+                terminatorlib.util.DEBUGCLASSES.append(item.strip())
         if options.debug_methods:
             methods = options.debug_methods.split(',')
             for item in methods:
-                util.DEBUGMETHODS.append(item.strip())
+                terminatorlib.util.DEBUGMETHODS.append(item.strip())
 
     if options.working_directory:
         if os.path.exists(os.path.expanduser(options.working_directory)):
@@ -142,13 +150,13 @@ icon for the window (by file or name)'))
     if options.layout is None:
         options.layout = 'default'
 
-    configobj = config.Config()
+    configobj = Config()
     if options.profile and options.profile not in configobj.list_profiles():
         options.profile = None
 
     configobj.options_set(options)
 
-    if util.DEBUG == True:
+    if terminatorlib.util.DEBUG == True:
         dbg('OptionParse::parse_options: command line options: %s' % options)
 
-    return(options)
+    return options

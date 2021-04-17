@@ -394,7 +394,7 @@ class Terminator(Borg):
         for window in self.windows:
             if window not in self.prelayout_windows:
                 new_win_list.append(window)
-        
+
         # Make sure all new windows get bumped to the top
         for window in new_win_list:
             window.show()
@@ -443,7 +443,7 @@ class Terminator(Borg):
         # Force the window background to be transparent for newer versions of
         # GTK3. We then have to fix all the widget backgrounds because the
         # widgets theming may not render it's own background.
-        css = """
+        css = b"""
             .terminator-terminal-window {
                 background-color: alpha(@theme_bg_color,0); }
 
@@ -460,7 +460,7 @@ class Terminator(Borg):
 
         # Fix several themes that put a borders, corners, or backgrounds around
         # viewports, making the titlebar look bad.
-        css += """
+        css += b"""
             .terminator-terminal-window GtkViewport,
             .terminator-terminal-window viewport {
                 border-width: 0px;
@@ -469,7 +469,7 @@ class Terminator(Borg):
             """
 
         # Add per profile snippets for setting the background of the HBox
-        template = """
+        template = b"""
             .terminator-profile-%s {
                 background-color: alpha(%s, %s); }
             """

@@ -9,15 +9,15 @@ exist to encourage re-use, but I can not find any
 specific licencing terms.
 """
 
-from util import dbg
+from terminatorlib.util import dbg
 
 # pylint: disable-msg=R0903
 # pylint: disable-msg=R0921
 class Borg:
     """Definition of a class that can never be duplicated. Correct usage is
     thus:
-        
-    >>> from borg import Borg
+
+    >>> from terminatorlib.borg import Borg
     >>> class foo(Borg):
     ...     # All attributes on a borg class *must* = None
     ...     attribute = None
@@ -29,13 +29,13 @@ class Borg:
     ...
     >>> bar = foo()
     >>> bar.prepare_attributes()
-    
+
     The important thing to note is that all attributes of borg classes *must* be
     declared as being None. If you attempt to use static class attributes you
     will get unpredicted behaviour. Instead, prepare_attributes() must be called
     which will then see the attributes in the shared state, and initialise them
     if necessary."""
-    __shared_state = {} 
+    __shared_state = {}
 
     def __init__(self, borgtype=None):
         """Class initialiser. Overwrite our class dictionary with the shared
@@ -43,7 +43,7 @@ class Borg:
         type."""
         if borgtype is None:
             raise TypeError('Borg::__init__: You must pass a borgtype')
-        if not self.__shared_state.has_key(borgtype):
+        if borgtype not in self.__shared_state:
             dbg('Borg::__init__: Preparing borg state for %s' % borgtype)
             self.__shared_state[borgtype] = {}
         self.__dict__ = self.__shared_state[borgtype]

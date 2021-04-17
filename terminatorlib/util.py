@@ -26,7 +26,7 @@ import subprocess
 import gi
 
 try:
-    gi.require_version('Gtk','3.0')
+    gi.require_version('Gtk', '3.0')
     from gi.repository import Gtk, Gdk
 except ImportError:
     print('You need Gtk 3.0+ to run Remotinator.')
@@ -41,7 +41,8 @@ DEBUGCLASSES = []
 # list of methods to show debugging for. empty list means show all methods
 DEBUGMETHODS = []
 
-def dbg(log = ""):
+
+def dbg(log=""):
     """Print a message if debugging is enabled"""
     if DEBUG:
         stackitem = inspect.stack()[1]
@@ -64,16 +65,18 @@ def dbg(log = ""):
         if DEBUGMETHODS != [] and method not in DEBUGMETHODS:
             return
         try:
-            print >> sys.stderr, "%s::%s: %s%s" % (classname, method, log, extra)
+            print("%s::%s: %s%s" % (classname, method, log, extra), sys.stderr)
         except IOError:
             pass
 
-def err(log = ""):
+
+def err(log=""):
     """Print an error message"""
     try:
-        print >> sys.stderr, log
+        print(log, file=sys.stderr)
     except IOError:
         pass
+
 
 def gerr(message = None):
     """Display a graphical error. This should only be used for serious
@@ -119,7 +122,7 @@ def path_lookup(command):
 
     try:
         paths = os.environ['PATH'].split(':')
-        if len(paths[0]) == 0: 
+        if len(paths[0]) == 0:
             raise(ValueError)
     except (ValueError, NameError):
         dbg('path_lookup: PATH not set in environment, using fallbacks')
@@ -180,7 +183,7 @@ def widget_pixbuf(widget, maxsize=None):
     cairo_context.paint()
 
     scaledpixbuf = Gdk.pixbuf_get_from_surface(preview_surface, 0, 0, preview_width, preview_height);
-    
+
     return(scaledpixbuf)
 
 def get_config_dir():
@@ -198,7 +201,7 @@ def dict_diff(reference, working):
     """Examine the values in the supplied working set and return a new dict
     that only contains those values which are different from those in the
     reference dictionary
-    
+
     >>> a = {'foo': 'bar', 'baz': 'bjonk'}
     >>> b = {'foo': 'far', 'baz': 'bjonk'}
     >>> dict_diff(a, b)
@@ -231,7 +234,7 @@ def get_edge(allocation, direction):
         p1, p2 = allocation.x, allocation.x + allocation.width
     else:
         raise ValueError('unknown direction %s' % direction)
-    
+
     return(edge, p1, p2)
 
 def get_nav_possible(edge, allocation, direction, p1, p2):
@@ -305,7 +308,7 @@ def enumerate_descendants(parent):
                     terminals.append(descendant)
             containers.append(child)
 
-    dbg('%d containers and %d terminals fall beneath %s' % (len(containers), 
+    dbg('%d containers and %d terminals fall beneath %s' % (len(containers),
         len(terminals), parent))
     return(containers, terminals)
 
@@ -335,7 +338,7 @@ def spawn_new_terminator(cwd, args):
             # we weren't started as ./terminator in a path. Give up
             err('Unable to locate Terminator')
             return False
-      
+
     dbg("Spawning: %s" % cmd)
     subprocess.Popen([cmd]+args)
 

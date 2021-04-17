@@ -7,11 +7,11 @@ from gi.repository import Gdk
 import dbus.service
 from dbus.exceptions import DBusException
 import dbus.glib
-from borg import Borg
-from terminator import Terminator
-from config import Config
-from factory import Factory
-from util import dbg,  enumerate_descendants
+from terminatorlib.borg import Borg
+from terminatorlib.terminator import Terminator
+from terminatorlib.config import Config
+from terminatorlib.factory import Factory
+from terminatorlib.util import dbg,  enumerate_descendants
 
 CONFIG = Config()
 if not CONFIG['dbus']:
@@ -45,14 +45,14 @@ class DBusService(Borg, dbus.service.Object):
         if not self.bus_name:
             dbg('Checking for bus name availability: %s' % BUS_NAME)
             bus = dbus.SessionBus()
-            proxy = bus.get_object('org.freedesktop.DBus', 
+            proxy = bus.get_object('org.freedesktop.DBus',
                                    '/org/freedesktop/DBus')
             flags = 1 | 4 # allow replacement | do not queue
             if not proxy.RequestName(BUS_NAME, dbus.UInt32(flags)) in (1, 4):
                 dbg('bus name unavailable: %s' % BUS_NAME)
                 raise dbus.exceptions.DBusException(
                     "Couldn't get DBus name %s: Name exists" % BUS_NAME)
-            self.bus_name = dbus.service.BusName(BUS_NAME, 
+            self.bus_name = dbus.service.BusName(BUS_NAME,
                                                  bus=dbus.SessionBus())
         if not self.bus_path:
             self.bus_path = BUS_PATH
@@ -68,7 +68,7 @@ class DBusService(Borg, dbus.service.Object):
         self.terminator.config.options_set(oldopts)
         self.terminator.create_layout(oldopts.layout)
         self.terminator.layout_done()
-            
+
     @dbus.service.method(BUS_NAME, in_signature='a{ss}')
     def new_tab_cmdline(self, options=dbus.Dictionary()):
         """Create a new tab"""
@@ -205,45 +205,45 @@ def new_tab_cmdline(session, options):
 @with_proxy
 def new_window(session, options):
     """Call the dbus method to open a new window"""
-    print session.new_window()
+    print(session.new_window())
 
 @with_proxy
 def new_tab(session, uuid, options):
     """Call the dbus method to open a new tab in the first window"""
-    print session.new_tab(uuid)
+    print(session.new_tab(uuid))
 
 @with_proxy
 def hsplit(session, uuid, options):
     """Call the dbus method to horizontally split a terminal"""
-    print session.hsplit(uuid)
+    print(session.hsplit(uuid))
 
 @with_proxy
 def vsplit(session, uuid, options):
     """Call the dbus method to vertically split a terminal"""
-    print session.vsplit(uuid)
+    print(session.vsplit(uuid))
 
 @with_proxy
 def get_terminals(session, options):
     """Call the dbus method to return a list of all terminals"""
-    print '\n'.join(session.get_terminals())
+    print('\n'.join(session.get_terminals()))
 
 @with_proxy
 def get_window(session, uuid, options):
     """Call the dbus method to return the toplevel tab for a terminal"""
-    print session.get_window(uuid)
+    print(session.get_window(uuid))
 
 @with_proxy
 def get_window_title(session, uuid, options):
     """Call the dbus method to return the title of a tab"""
-    print session.get_window_title(uuid)
+    print(session.get_window_title(uuid))
 
 @with_proxy
 def get_tab(session, uuid, options):
     """Call the dbus method to return the toplevel tab for a terminal"""
-    print session.get_tab(uuid)
+    print(session.get_tab(uuid))
 
 @with_proxy
 def get_tab_title(session, uuid, options):
     """Call the dbus method to return the title of a tab"""
-    print session.get_tab_title(uuid)
+    print(session.get_tab_title(uuid))
 

@@ -15,7 +15,7 @@
 import platform
 import os
 import pwd
-from util import dbg, err
+from terminatorlib.util import dbg, err
 
 try:
     import psutil
@@ -32,7 +32,7 @@ def get_default_cwd():
             cwd = pwd.getpwuid(os.getuid())[5]
         except KeyError:
             cwd = '/'
-    
+
     return(cwd)
 
 def get_pid_cwd():
@@ -66,19 +66,22 @@ def proc_get_pid_cwd(pid, path):
     insert it into, e.g. /proc/%s/cwd"""
     try:
         cwd = os.path.realpath(path % pid)
-    except Exception, ex:
+    except Exception as ex:
         err('Unable to get cwd for PID %s: %s' % (pid, ex))
         cwd = '/'
 
     return(cwd)
 
+
 def linux_get_pid_cwd(pid):
     """Determine the cwd for a given PID on Linux kernels"""
     return(proc_get_pid_cwd(pid, '/proc/%s/cwd'))
 
+
 def sunos_get_pid_cwd(pid):
     """Determine the cwd for a given PID on SunOS kernels"""
     return(proc_get_pid_cwd(pid, '/proc/%s/path/cwd'))
+
 
 def psutil_cwd(pid):
     """Determine the cwd using psutil which also supports Darwin"""

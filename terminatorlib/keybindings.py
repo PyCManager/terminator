@@ -17,19 +17,22 @@
 
 """Terminator by Chris Jones <cmsj@tenshu.net>
 
-Validator and functions for dealing with Terminator's customisable 
+Validator and functions for dealing with Terminator's customisable
 keyboard shortcuts.
 
 """
 
 import re
 from gi.repository import Gtk, Gdk
-from util import err
+from terminatorlib.util import err
+
+MODIFIER = re.compile('<([^<]+)>')
+
 
 class KeymapError(Exception):
     """Custom exception for errors in keybinding configurations"""
 
-MODIFIER = re.compile('<([^<]+)>')
+
 class Keybindings:
     """Class to handle loading and lookup of Terminator keybindings"""
 
@@ -117,11 +120,11 @@ class Keybindings:
         """Translate a keyboard event into a mapped key"""
         try:
             _found, keyval, _egp, _lvl, consumed = self.keymap.translate_keyboard_state(
-                                              event.hardware_keycode, 
+                                              event.hardware_keycode,
                                               Gdk.ModifierType(event.get_state() & ~Gdk.ModifierType.LOCK_MASK),
                                               event.group)
         except TypeError:
-            err ("keybindings.lookup failed to translate keyboard event: %s" % 
+            err ("keybindings.lookup failed to translate keyboard event: %s" %
                      dir(event))
             return None
         mask = (event.get_state() & ~consumed) & self._masks

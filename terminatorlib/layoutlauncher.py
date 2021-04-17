@@ -7,11 +7,12 @@ import os
 from gi.repository import Gtk
 from gi.repository import GObject
 
-from util import dbg, err, spawn_new_terminator
-import config
-from translation import _
-from terminator import Terminator
-from plugin import PluginRegistry
+from terminatorlib.util import dbg, err, spawn_new_terminator
+from terminatorlib.config import Config
+from terminatorlib.translation import _
+from terminatorlib.terminator import Terminator
+from terminatorlib.plugin import PluginRegistry
+
 
 class LayoutLauncher:
     """Class implementing the various parts of the preferences editor"""
@@ -29,18 +30,18 @@ class LayoutLauncher:
         self.terminator = Terminator()
         self.terminator.register_launcher_window(self)
 
-        self.config = config.Config()
+        self.config = Config()
         self.config.base.reload()
         self.builder = Gtk.Builder()
         try:
             # Figure out where our library is on-disk so we can open our UI
-            (head, _tail) = os.path.split(config.__file__)
+            (head, _tail) = os.path.split(Config.__file__)
             librarypath = os.path.join(head, 'layoutlauncher.glade')
             gladefile = open(librarypath, 'r')
             gladedata = gladefile.read()
-        except Exception, ex:
-            print "Failed to find layoutlauncher.glade"
-            print ex
+        except Exception as ex:
+            print("Failed to find layoutlauncher.glade")
+            print(ex)
             return
 
         self.builder.add_from_string(gladedata)
@@ -72,7 +73,7 @@ class LayoutLauncher:
         """Update the contents of the layout"""
         self.layouttreestore.clear()
         layouts = self.config.list_layouts()
-        for layout in sorted(layouts, cmp=lambda x,y: cmp(x.lower(), y.lower())):
+        for layout in sorted(layouts, cmp=lambda x, y: cmp(x.lower(), y.lower())):
             if layout != "default":
                 self.layouttreestore.append([layout])
             else:

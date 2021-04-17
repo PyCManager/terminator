@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #    Terminator - multiple gnome terminals in one window
 #    Copyright (C) 2006-2010  cmsj@tenshu.net
 #
@@ -13,7 +13,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
 #    USA
 
 """Terminator by Chris Jones <cmsj@tenshu.net>"""
@@ -30,21 +30,19 @@ except OSError:
 # Check we have simple basics like Gtk+ and a valid $DISPLAY
 try:
     import gi
-    gi.require_version('Gtk','3.0')
+    gi.require_version('Gtk', '3.0')
     # pylint: disable-msg=W0611
     from gi.repository import Gtk, Gdk
 
     if Gdk.Display.get_default() == None:
-        print('You need to run terminator in an X environment. ' \
-              'Make sure $DISPLAY is properly set')
+        print('You need to run terminator in an X environment. Make sure $DISPLAY is properly set')
         sys.exit(1)
 
 except ImportError:
-    print('You need to install the python bindings for ' \
-           'gobject, gtk and pango to run Terminator.')
+    print('You need to install the python bindings for gobject, gtk and pango to run Terminator.')
     sys.exit(1)
 
-import terminatorlib.optionparse
+from terminatorlib.optionparse import parse_options
 from terminatorlib.terminator import Terminator
 from terminatorlib.factory import Factory
 from terminatorlib.version import APP_NAME, APP_VERSION
@@ -63,9 +61,9 @@ if __name__ == '__main__':
 
     dbus_service = None
 
-    dbg ("%s starting up, version %s" % (APP_NAME, APP_VERSION))
-  
-    OPTIONS = terminatorlib.optionparse.parse_options()
+    dbg("%s starting up, version %s" % (APP_NAME, APP_VERSION))
+
+    OPTIONS = parse_options()
 
     if OPTIONS.select:
         # launch gui, return selection
@@ -87,7 +85,7 @@ if __name__ == '__main__':
             except ipc.DBusException:
                 dbg('Unable to become master process, operating via DBus')
                 # get rid of the None and True types so dbus can handle them (empty
-                # and 'True' strings are used instead), also arrays are joined 
+                # and 'True' strings are used instead), also arrays are joined
                 # (the -x argument for example)
                 if OPTIONS.working_directory is None:
                     OPTIONS.working_directory = ORIGCWD
@@ -97,7 +95,7 @@ if __name__ == '__main__':
                         val = ' '.join(val)
                     if val == True:
                         val = 'True'
-                    optionslist[opt] = val and '%s'%val or ''
+                    optionslist[opt] = val and '%s' % val or ''
                 optionslist = dbus.Dictionary(optionslist, signature='ss')
                 if OPTIONS.new_tab:
                     dbg('Requesting a new tab')
@@ -120,7 +118,7 @@ if __name__ == '__main__':
         try:
             dbg('Creating a terminal with layout: %s' % OPTIONS.layout)
             TERMINATOR.create_layout(OPTIONS.layout)
-        except (KeyError,ValueError), ex:
+        except (KeyError, ValueError) as ex:
             err('layout creation failed, creating a window ("%s")' % ex)
             TERMINATOR.new_window()
         TERMINATOR.layout_done()

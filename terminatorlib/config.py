@@ -67,17 +67,17 @@ KeyError: 'ConfigBase::get_item: unknown key algo'
 >>> config.options_set({})
 >>> config.options_get()
 {}
->>> 
+>>>
 
 """
 
 import platform
 import os
 from copy import copy
-from configobj.configobj import ConfigObj, flatten_errors
-from configobj.validate import Validator
-from borg import Borg
-from util import dbg, err, DEBUG, get_config_dir, dict_diff
+from terminatorlib.configobj.configobj import ConfigObj, flatten_errors
+from terminatorlib.configobj.validate import Validator
+from terminatorlib.borg import Borg
+from terminatorlib.util import dbg, err, DEBUG, get_config_dir, dict_diff
 
 from gi.repository import Gio
 
@@ -192,7 +192,7 @@ DEFAULTS = {
             'edit_terminal_title': '<Control><Alt>x',
             'layout_launcher'  : '<Alt>l',
             'next_profile'     : '',
-            'previous_profile' : '', 
+            'previous_profile' : '',
             'help'             : 'F1'
         },
         'profiles': {
@@ -263,6 +263,7 @@ DEFAULTS = {
         },
 }
 
+
 class Config(object):
     """Class to provide a slightly richer config API above ConfigBase"""
     base = None
@@ -271,7 +272,7 @@ class Config(object):
     system_prop_font = None
     system_focus = None
     inhibited = None
-    
+
     def __init__(self, profile='default'):
         self.base = ConfigBase()
         self.set_profile(profile)
@@ -280,15 +281,15 @@ class Config(object):
 
     def __getitem__(self, key, default=None):
         """Look up a configuration item"""
-        return(self.base.get_item(key, self.profile, default=default))
+        return self.base.get_item(key, self.profile, default=default)
 
     def __setitem__(self, key, value):
         """Set a particular configuration item"""
-        return(self.base.set_item(key, value, self.profile))
+        return self.base.set_item(key, value, self.profile)
 
     def get_profile(self):
         """Get our profile"""
-        return(self.profile)
+        return self.profile
 
     def set_profile(self, profile, force=False):
         """Set our profile (which usually means change it)"""
@@ -298,13 +299,13 @@ class Config(object):
             profile = options.profile
         dbg('Config::set_profile: Changing profile to %s' % profile)
         self.profile = profile
-        if not self.base.profiles.has_key(profile):
+        if profile not in self.base.profiles:
             dbg('Config::set_profile: %s does not exist, creating' % profile)
             self.base.profiles[profile] = copy(DEFAULTS['profiles']['default'])
 
     def add_profile(self, profile):
         """Add a new profile"""
-        return(self.base.add_profile(profile))
+        return self.base.add_profile(profile)
 
     def del_profile(self, profile):
         """Delete a profile"""
@@ -330,15 +331,15 @@ class Config(object):
 
     def list_profiles(self):
         """List all configured profiles"""
-        return(self.base.profiles.keys())
+        return self.base.profiles.keys()
 
     def add_layout(self, name, layout):
         """Add a new layout"""
-        return(self.base.add_layout(name, layout))
+        return self.base.add_layout(name, layout)
 
     def replace_layout(self, name, layout):
         """Replace an existing layout"""
-        return(self.base.replace_layout(name, layout)) 
+        return self.base.replace_layout(name, layout)
 
     def del_layout(self, layout):
         """Delete a layout"""
@@ -353,7 +354,7 @@ class Config(object):
 
     def list_layouts(self):
         """List all configured layouts"""
-        return(self.base.layouts.keys())
+        return self.base.layouts.keys()
 
     def connect_gsetting_callbacks(self):
         """Get system settings and create callbacks for changes"""
@@ -368,7 +369,7 @@ class Config(object):
     def get_system_prop_font(self):
         """Look up the system font"""
         if self.system_prop_font is not None:
-            return(self.system_prop_font)
+            return self.system_prop_font
         elif 'org.gnome.desktop.interface' not in Gio.Settings.list_schemas():
             return
         else:
@@ -378,12 +379,12 @@ class Config(object):
                 self.system_prop_font = value.get_string()
             else:
                 self.system_prop_font = "Sans 10"
-            return(self.system_prop_font)
+            return self.system_prop_font
 
     def get_system_mono_font(self):
         """Look up the system font"""
         if self.system_mono_font is not None:
-            return(self.system_mono_font)
+            return self.system_mono_font
         elif 'org.gnome.desktop.interface' not in Gio.Settings.list_schemas():
             return
         else:
@@ -393,12 +394,12 @@ class Config(object):
                 self.system_mono_font = value.get_string()
             else:
                 self.system_mono_font = "Mono 10"
-            return(self.system_mono_font)
+            return self.system_mono_font
 
     def get_system_focus(self):
         """Look up the system focus setting"""
         if self.system_focus is not None:
-            return(self.system_focus)
+            return self.system_focus
         elif 'org.gnome.desktop.interface' not in Gio.Settings.list_schemas():
             return
         else:
@@ -406,7 +407,7 @@ class Config(object):
             value = gsettings.get_value('focus-mode')
             if value:
                 self.system_focus = value.get_string()
-            return(self.system_focus)
+            return self.system_focus
 
     def on_gsettings_change_event(self, settings, key):
         """Handle a gsetting change event"""
@@ -422,9 +423,9 @@ class Config(object):
     def save(self):
         """Cause ConfigBase to save our config to file"""
         if self.inhibited is True:
-            return(True)
+            return True
         else:
-            return(self.base.save())
+            return self.base.save()
 
     def inhibit_save(self):
         """Prevent calls to save() being honoured"""
@@ -440,37 +441,38 @@ class Config(object):
 
     def options_get(self):
         """Get the command line options"""
-        return(self.base.command_line_options)
+        return self.base.command_line_options
 
     def plugin_get(self, pluginname, key, default=None):
         """Get a plugin config value, if doesn't exist
             return default if specified
         """
-        return(self.base.get_item(key, plugin=pluginname, default=default))
+        return self.base.get_item(key, plugin=pluginname, default=default)
 
     def plugin_set(self, pluginname, key, value):
         """Set a plugin config value"""
-        return(self.base.set_item(key, value, plugin=pluginname))
+        return self.base.set_item(key, value, plugin=pluginname)
 
     def plugin_get_config(self, plugin):
         """Return a whole config tree for a given plugin"""
-        return(self.base.get_plugin(plugin))
+        return self.base.get_plugin(plugin)
 
     def plugin_set_config(self, plugin, tree):
         """Set a whole config tree for a given plugin"""
-        return(self.base.set_plugin(plugin, tree))
+        return self.base.set_plugin(plugin, tree)
 
     def plugin_del_config(self, plugin):
         """Delete a whole config tree for a given plugin"""
-        return(self.base.del_plugin(plugin))
+        return self.base.del_plugin(plugin)
 
     def layout_get_config(self, layout):
         """Return a layout"""
-        return(self.base.get_layout(layout))
+        return self.base.get_layout(layout)
 
     def layout_set_config(self, layout, tree):
         """Set a layout"""
-        return(self.base.set_layout(layout, tree))
+        return self.base.set_layout(layout, tree)
+
 
 class ConfigBase(Borg):
     """Class to provide access to our user configuration"""
@@ -490,8 +492,8 @@ class ConfigBase(Borg):
         Borg.__init__(self, self.__class__.__name__)
 
         self.prepare_attributes()
-        import optionparse
-        self.command_line_options = optionparse.options
+        from terminatorlib.optionparse import options
+        self.command_line_options = options
         self.load()
 
     def prepare_attributes(self):
@@ -586,7 +588,7 @@ class ConfigBase(Borg):
         configspec = ConfigObj(configspecdata)
         if DEBUG == True:
             configspec.write(open('/tmp/terminator_configspec_debug.txt', 'w'))
-        return(configspec)
+        return configspec
 
     def load(self):
         """Load configuration data from our various sources"""
@@ -604,7 +606,7 @@ class ConfigBase(Borg):
         dbg('looking for config file: %s' % filename)
         try:
             configfile = open(filename, 'r')
-        except Exception, ex:
+        except Exception as ex:
             if not self.whined:
                 err('ConfigBase::load: Unable to open %s (%s)' % (filename, ex))
                 self.whined = True
@@ -617,7 +619,7 @@ class ConfigBase(Borg):
             parser = ConfigObj(configfile, configspec=configspec)
             validator = Validator()
             result = parser.validate(validator, preserve_errors=True)
-        except Exception, ex:
+        except Exception as ex:
             err('Unable to load configuration: %s' % ex)
             return
 
@@ -669,7 +671,7 @@ class ConfigBase(Borg):
             else:
                 try:
                     section.update(parser[section_name])
-                except KeyError, ex:
+                except KeyError as ex:
                     dbg('ConfigBase::load: skipping missing section %s' %
                             section_name)
 
@@ -679,7 +681,7 @@ class ConfigBase(Borg):
         """Force a reload of the base config"""
         self.loaded = False
         self.load()
-        
+
     def save(self):
         """Save the config to a file"""
         dbg('ConfigBase::save: saving config')
@@ -712,29 +714,28 @@ class ConfigBase(Borg):
             os.makedirs(config_dir)
         try:
             parser.write(open(self.command_line_options.config, 'w'))
-        except Exception, ex:
+        except Exception as ex:
             err('ConfigBase::save: Unable to save config: %s' % ex)
 
     def get_item(self, key, profile='default', plugin=None, default=None):
         """Look up a configuration item"""
-        if not self.profiles.has_key(profile):
+        if profile not in self.profiles:
             # Hitting this generally implies a bug
             profile = 'default'
 
-        if self.global_config.has_key(key):
-            dbg('ConfigBase::get_item: %s found in globals: %s' %
-                    (key, self.global_config[key]))
-            return(self.global_config[key])
-        elif self.profiles[profile].has_key(key):
+        if key in self.global_config:
+            dbg('ConfigBase::get_item: %s found in globals: %s' % (key, self.global_config[key]))
+            return self.global_config[key]
+        elif key in self.profiles[profile]:
             dbg('ConfigBase::get_item: %s found in profile %s: %s' % (
                     key, profile, self.profiles[profile][key]))
-            return(self.profiles[profile][key])
+            return self.profiles[profile][key]
         elif key == 'keybindings':
-            return(self.keybindings)
+            return self.keybindings
         elif plugin and plugin in self.plugins and key in self.plugins[plugin]:
             dbg('ConfigBase::get_item: %s found in plugin %s: %s' % (
                     key, plugin, self.plugins[plugin][key]))
-            return(self.plugins[plugin][key])
+            return self.plugins[plugin][key]
         elif default:
             return default
         else:
@@ -742,28 +743,27 @@ class ConfigBase(Borg):
 
     def set_item(self, key, value, profile='default', plugin=None):
         """Set a configuration item"""
-        dbg('ConfigBase::set_item: Setting %s=%s (profile=%s, plugin=%s)' %
-                (key, value, profile, plugin))
+        dbg('ConfigBase::set_item: Setting %s=%s (profile=%s, plugin=%s)' % (key, value, profile, plugin))
 
-        if self.global_config.has_key(key):
+        if key in self.global_config:
             self.global_config[key] = value
-        elif self.profiles[profile].has_key(key):
+        elif key in self.profiles[profile]:
             self.profiles[profile][key] = value
         elif key == 'keybindings':
             self.keybindings = value
         elif plugin is not None:
-            if not self.plugins.has_key(plugin):
+            if plugin not in self.plugins:
                 self.plugins[plugin] = {}
             self.plugins[plugin][key] = value
         else:
             raise KeyError('ConfigBase::set_item: unknown key %s' % key)
 
-        return(True)
+        return True
 
     def get_plugin(self, plugin):
         """Return a whole tree for a plugin"""
-        if self.plugins.has_key(plugin):
-            return(self.plugins[plugin])
+        if plugin in self.plugins:
+            return self.plugins[plugin]
 
     def set_plugin(self, plugin, tree):
         """Set a whole tree for a plugin"""
@@ -777,28 +777,28 @@ class ConfigBase(Borg):
     def add_profile(self, profile):
         """Add a new profile"""
         if profile in self.profiles:
-            return(False)
+            return False
         self.profiles[profile] = copy(DEFAULTS['profiles']['default'])
-        return(True)
+        return True
 
     def add_layout(self, name, layout):
         """Add a new layout"""
         if name in self.layouts:
-            return(False)
+            return False
         self.layouts[name] = layout
-        return(True)
+        return True
 
     def replace_layout(self, name, layout):
         """Replaces a layout with the given name"""
         if not name in self.layouts:
-            return(False)
+            return False
         self.layouts[name] = layout
-        return(True)
+        return True
 
     def get_layout(self, layout):
         """Return a layout"""
-        if self.layouts.has_key(layout):
-            return(self.layouts[layout])
+        if layout in self.layouts:
+            return self.layouts[layout]
         else:
             err('layout does not exist: %s' % layout)
 
